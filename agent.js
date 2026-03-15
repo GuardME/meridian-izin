@@ -43,7 +43,6 @@ export async function agentLoop(goal, maxSteps = config.llm.maxSteps, sessionHis
 
     try {
       const activeModel = model || DEFAULT_MODEL;
-      log("agent", `Using model: ${activeModel}`);
 
       // Retry up to 3 times on transient provider errors (502, 503, 529)
       const FALLBACK_MODEL = "stepfun/step-3.5-flash:free";
