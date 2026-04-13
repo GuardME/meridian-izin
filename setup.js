@@ -307,6 +307,13 @@ const LLM_PROVIDERS = [
     modelDefault: "MiniMax-Text-01",
   },
   {
+    label:   "BytePlus     (ModelArk — GLM, Doubao, etc.)",
+    key:     "byteplus",
+    baseUrl: "https://ark.ap-southeast.bytepluses.com/api/v3",
+    keyHint: "your BytePlus API key",
+    modelDefault: "glm-4-7-251222",
+  },
+  {
     label:   "OpenAI       (api.openai.com)",
     key:     "openai",
     baseUrl: "https://api.openai.com/v1",
@@ -360,6 +367,16 @@ const envMap = {
   ...(isKept(telegramToken) ? {} : { TELEGRAM_BOT_TOKEN: telegramToken }),
   ...(telegramChatId        ? { TELEGRAM_CHAT_ID: telegramChatId } : {}),
   DRY_RUN: dryRun ? "true" : "false",
+  ...(provider.key === "byteplus" ? {
+    LLM_PROVIDER: "byteplus",
+    BYTEPLUS_API_KEY: llmApiKey,
+    BYTEPLUS_BASE_URL: llmBaseUrl,
+    LLM_MODEL: llmModel,
+  } : {
+    LLM_BASE_URL: llmBaseUrl,
+    LLM_API_KEY: llmApiKey,
+    LLM_MODEL: llmModel,
+  }),
 };
 fs.writeFileSync(ENV_PATH, buildEnv(envMap));
 

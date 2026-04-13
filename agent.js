@@ -69,15 +69,17 @@ import { config } from "./config.js";
 import { getStateSummary } from "./state.js";
 import { getLessonsForPrompt, getPerformanceSummary } from "./lessons.js";
 
-// Supports OpenRouter (default) or any OpenAI-compatible local server (e.g. LM Studio)
-// To use LM Studio: set LLM_BASE_URL=http://localhost:1234/v1 and LLM_API_KEY=lm-studio in .env
+// Supports OpenRouter, BytePlus ModelArk, or any OpenAI-compatible server
+const isByteplus = process.env.LLM_PROVIDER === "byteplus";
 const client = new OpenAI({
-  baseURL: process.env.LLM_BASE_URL || "https://openrouter.ai/api/v1",
-  apiKey: process.env.LLM_API_KEY || process.env.OPENROUTER_API_KEY,
+  baseURL: process.env.LLM_BASE_URL
+    || (isByteplus ? process.env.BYTEPLUS_BASE_URL : "https://openrouter.ai/api/v1"),
+  apiKey: process.env.LLM_API_KEY
+    || (isByteplus ? process.env.BYTEPLUS_API_KEY : process.env.OPENROUTER_API_KEY),
   timeout: 5 * 60 * 1000,
 });
 
-const DEFAULT_MODEL = process.env.LLM_MODEL || "openrouter/healer-alpha";
+const DEFAULT_MODEL = process.env.LLM_MODEL || "glm-4-7-251222";
 
 /**
  * Core ReAct agent loop.
@@ -115,7 +117,7 @@ export async function agentLoop(goal, maxSteps = config.llm.maxSteps, sessionHis
       const activeModel = model || DEFAULT_MODEL;
 
       // Retry up to 3 times on transient provider errors (502, 503, 529)
-      const FALLBACK_MODEL = "stepfun/step-3.5-flash:free";
+      const FALLBACK_MODEL = isByteplus ? activeModel : "stepfun/step-3.5-flash:free";
       let response;
       let usedModel = activeModel;
       // Force a tool call on step 0 for action intents — prevents model from hallucinating results

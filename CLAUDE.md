@@ -90,7 +90,7 @@ Sets defined in `agent.js:6-7`. If you add a tool, also add it to the relevant s
 | outOfRangeWaitMinutes | management | 30 |
 | managementIntervalMin | schedule | 10 |
 | screeningIntervalMin | schedule | 30 |
-| managementModel / screeningModel / generalModel | llm | openrouter/healer-alpha |
+| managementModel / screeningModel / generalModel | llm | glm-4-7-251222 |
 
 **`computeDeployAmount(walletSol)`** — scales position size with wallet balance (compounding). Formula: `clamp(deployable × positionSizePct, floor=deployAmountSol, ceil=maxDeployAmount)`.
 
@@ -177,8 +177,10 @@ const actualBaseFee = baseFactor > 0
 
 ## Model Configuration
 
-- Default model: `process.env.LLM_MODEL` or `openrouter/healer-alpha`
-- Fallback on 502/503/529: `stepfun/step-3.5-flash:free` (2nd attempt), then retry
+- Default model: `process.env.LLM_MODEL` or `glm-4-7-251222`
+- Provider routing: `LLM_PROVIDER=byteplus` uses `BYTEPLUS_BASE_URL` + `BYTEPLUS_API_KEY`; otherwise defaults to OpenRouter
+- BytePlus ModelArk: set `LLM_PROVIDER=byteplus`, `BYTEPLUS_API_KEY`, `BYTEPLUS_BASE_URL=https://ark.ap-southeast.bytepluses.com/api/v3`
+- Fallback on 502/503/529: retries same model on BytePlus; uses `stepfun/step-3.5-flash:free` on OpenRouter
 - Per-role models: `managementModel`, `screeningModel`, `generalModel` in user-config.json
 - LM Studio: set `LLM_BASE_URL=http://localhost:1234/v1` and `LLM_API_KEY=lm-studio`
 - `maxOutputTokens` minimum: 2048 (free models may have lower limits causing empty responses)
@@ -209,7 +211,10 @@ Not required for normal operation.
 |-----|----------|---------|
 | `WALLET_PRIVATE_KEY` | Yes | Base58 or JSON array private key |
 | `RPC_URL` | Yes | Solana RPC endpoint |
-| `OPENROUTER_API_KEY` | Yes | LLM API key |
+| `OPENROUTER_API_KEY` | Yes* | LLM API key (OpenRouter provider) |
+| `LLM_PROVIDER` | No | Set to `byteplus` for BytePlus ModelArk |
+| `BYTEPLUS_API_KEY` | Yes* | BytePlus ModelArk API key |
+| `BYTEPLUS_BASE_URL` | No | BytePlus endpoint (default: ap-southeast) |
 | `TELEGRAM_BOT_TOKEN` | No | Telegram notifications |
 | `TELEGRAM_CHAT_ID` | No | Telegram chat target |
 | `LLM_BASE_URL` | No | Override for local LLM (e.g. LM Studio) |
@@ -218,6 +223,8 @@ Not required for normal operation.
 | `HIVE_MIND_URL` | No | Collective intelligence server |
 | `HIVE_MIND_API_KEY` | No | Hive mind auth token |
 | `HELIUS_API_KEY` | No | Enhanced wallet balance data |
+
+*One of `OPENROUTER_API_KEY` or `BYTEPLUS_API_KEY` is required depending on provider.
 
 ---
 
